@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NASA FieldFarm : Agro-Ecological Decision System</title>
   <meta name="description" content="Precision agro-ecological rotation system integrating NASA SMAP, MODIS, and POWER datasets for climate-resilient field farming.">
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -118,11 +120,42 @@
         <div class="input-container-card">
           <form id="farm-input-form" novalidate>
             <div class="input-form-grid">
-              <!-- Field 1: Coordinates -->
+              <!-- Leaflet Map Integration (Step 1: Farmer clicks farm location on Leaflet Map) -->
+              <div class="field-col-12 form-group leaflet-map-section">
+                <div class="map-header-bar">
+                  <div class="form-label">
+                    <span>
+                      <strong style="color: var(--text-strong);">Leaflet Map</strong> : Farmer Clicks Farm Location
+                    </span>
+                    <span class="form-subtext" id="map-click-hint">Click anywhere on the map or drag the farm marker to set field coordinates</span>
+                  </div>
+                  <div class="map-controls-row">
+                    <div class="map-layer-pills" role="group" aria-label="Map Tile Layers">
+                      <button type="button" id="btn-map-layer-sat" class="preset-pill-btn active" title="Satellite Imagery">🛰️ Satellite</button>
+                      <button type="button" id="btn-map-layer-streets" class="preset-pill-btn" title="Street Map">🗺️ Streets</button>
+                      <button type="button" id="btn-map-layer-topo" class="preset-pill-btn" title="Topographic">⛰️ Topo</button>
+                    </div>
+                    <div class="map-search-inline">
+                      <input type="text" id="map-search-input" class="input-field mono" placeholder="Search village / district / coordinates..." />
+                      <button type="button" id="btn-map-search" class="btn-secondary" title="Search Location">Search</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div id="farm-leaflet-map" class="amx-map-container" tabindex="0" role="region" aria-label="Interactive Leaflet Farm Map"></div>
+
+                <div class="map-locality-bar" id="map-locality-display">
+                  <span class="locality-icon">📍</span>
+                  <span class="locality-label">Selected Field Locality:</span>
+                  <span class="locality-value" id="locality-text">Deccan Plateau Agricultural Zone (20.5937° N, 78.9629° E)</span>
+                </div>
+              </div>
+
+              <!-- Field 1: Coordinates (Gives latitude and longitude) -->
               <div class="field-col-6 form-group">
                 <div class="form-label">
                   <label for="input-latitude">GPS Latitude</label>
-                  <span class="form-subtext">Coordinate (-90.0 to 90.0)</span>
+                  <span class="form-subtext">Auto-updated on map click</span>
                 </div>
                 <input type="number" id="input-latitude" class="input-field mono" value="20.5937" step="any" min="-90" max="90" required>
               </div>
@@ -130,14 +163,14 @@
               <div class="field-col-6 form-group">
                 <div class="form-label">
                   <label for="input-longitude">GPS Longitude</label>
-                  <span class="form-subtext">Coordinate (-180.0 to 180.0)</span>
+                  <span class="form-subtext">Auto-updated on map click</span>
                 </div>
                 <input type="number" id="input-longitude" class="input-field mono" value="78.9629" step="any" min="-180" max="180" required>
               </div>
 
               <!-- Quick Presets Row -->
               <div class="field-col-12 form-group">
-                <span class="form-label">Quick Regional Presets</span>
+                <span class="form-label">Quick Regional Presets (Pans Leaflet Map)</span>
                 <div class="preset-pills-row" role="group" aria-label="Regional Agro-Ecological Presets">
                   <button type="button" class="preset-pill-btn active" data-lat="20.5937" data-lng="78.9629" data-name="Deccan Plateau Semi-Arid">Deccan Plateau (Semi-Arid)</button>
                   <button type="button" class="preset-pill-btn" data-lat="30.9010" data-lng="75.8573" data-name="Punjab Canal Plain">Punjab Plain (Canal Irrigated)</button>
@@ -573,6 +606,8 @@
     </div>
   </footer>
 
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script src="app.js"></script>
 </body>
 </html>

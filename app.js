@@ -22,6 +22,15 @@
   const btnErrorReset = document.getElementById('btn-error-reset');
   const btnViewRawJson = document.getElementById('btn-view-raw-json');
 
+  // Leaflet Map Elements
+  const mapContainer = document.getElementById('farm-leaflet-map');
+  const btnLayerSat = document.getElementById('btn-map-layer-sat');
+  const btnLayerStreets = document.getElementById('btn-map-layer-streets');
+  const btnLayerTopo = document.getElementById('btn-map-layer-topo');
+  const mapSearchInput = document.getElementById('map-search-input');
+  const btnMapSearch = document.getElementById('btn-map-search');
+  const localityText = document.getElementById('locality-text');
+
   // Containers & States
   const strategiesCardGrid = document.getElementById('strategies-card-grid');
   const stateLoading = document.getElementById('state-loading');
@@ -78,6 +87,200 @@
   }
 
   themeToggleBtn.addEventListener('click', toggleTheme);
+
+  // --- 2b. Leaflet GIS Map Engine (Flowchart Step 1: User action on webpage) ---
+  let map = null;
+  let farmMarker = null;
+  let farmAccuracyCircle = null;
+  let activeTileLayer = 'satellite';
+
+  const tileLayers = {
+    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Esri World Imagery',
+      maxZoom: 19
+    }),
+    streets: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }),
+    topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenTopoMap (CC-BY-SA)',
+      maxZoom: 17
+    })
+  };
+
+  const farmIcon = L.divIcon({
+    className: 'farm-leaflet-pin',
+    html: '<div class="pin-body"><span class="pin-icon">📍</span></div>',
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -28]
+  });
+
+  function initLeafletMap() {
+    if (!mapContainer || typeof L === 'undefined') return;
+
+    const initialLat = parseFloat(inputLat.value) || 20.5937;
+    const initialLng = parseFloat(inputLng.value) || 78.9629;
+
+    map = L.map('farm-leaflet-map', {
+      center: [initialLat, initialLng],
+      zoom: 12,
+      layers: [tileLayers.satellite],
+      zoomControl: true
+    });
+
+    farmMarker = L.marker([initialLat, initialLng], {
+      icon: farmIcon,
+      draggable: true
+    }).addTo(map);
+
+    farmAccuracyCircle = L.circle([initialLat, initialLng], {
+      radius: 200,
+      color: '#10b981',
+      fillColor: '#10b981',
+      fillOpacity: 0.15,
+      weight: 1.5,
+      dashArray: '3, 4'
+    }).addTo(map);
+
+    farmMarker.bindPopup(`
+      <div style="font-family: system-ui, sans-serif; font-size: 12px; color: #171717;">
+        <strong style="color: #10b981;">🌱 Farm Location</strong><br>
+        <span style="font-family: monospace;">${initialLat.toFixed(4)}° N, ${initialLng.toFixed(4)}° E</span><br>
+        <span style="color: #666; font-size: 11px;">Drag marker or click map to change</span>
+      </div>
+    `);
+
+    // Flowchart: Farmer clicks farm location on Leaflet Map -> Gives latitude and longitude
+    map.on('click', function (e) {
+      updateCoordinatesFromMap(e.latlng.lat, e.latlng.lng, false);
+    });
+
+    farmMarker.on('dragend', function (e) {
+      const pos = e.target.getLatLng();
+      updateCoordinatesFromMap(pos.lat, pos.lng, false);
+    });
+
+    if (btnLayerSat) btnLayerSat.addEventListener('click', function () { switchMapLayer('satellite'); });
+    if (btnLayerStreets) btnLayerStreets.addEventListener('click', function () { switchMapLayer('streets'); });
+    if (btnLayerTopo) btnLayerTopo.addEventListener('click', function () { switchMapLayer('topo'); });
+
+    if (btnMapSearch && mapSearchInput) {
+      btnMapSearch.addEventListener('click', function () { searchLocationOnMap(mapSearchInput.value); });
+      mapSearchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          searchLocationOnMap(mapSearchInput.value);
+        }
+      });
+    }
+
+    // Direct manual edits on inputs
+    [inputLat, inputLng].forEach(function (input) {
+      input.addEventListener('change', function () {
+        const lat = parseFloat(inputLat.value);
+        const lng = parseFloat(inputLng.value);
+        if (!isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+          updateCoordinatesFromMap(lat, lng, true, 12, false);
+        }
+      });
+    });
+
+    setTimeout(function () { map.invalidateSize(); }, 250);
+  }
+
+  function switchMapLayer(layerKey) {
+    if (activeTileLayer === layerKey || !map) return;
+    map.removeLayer(tileLayers[activeTileLayer]);
+    map.addLayer(tileLayers[layerKey]);
+    activeTileLayer = layerKey;
+
+    if (btnLayerSat) btnLayerSat.classList.toggle('active', layerKey === 'satellite');
+    if (btnLayerStreets) btnLayerStreets.classList.toggle('active', layerKey === 'streets');
+    if (btnLayerTopo) btnLayerTopo.classList.toggle('active', layerKey === 'topo');
+  }
+
+  function updateCoordinatesFromMap(lat, lng, fly, zoom, triggerRecalc = true) {
+    const validLat = Number(parseFloat(lat).toFixed(4));
+    const validLng = Number(parseFloat(lng).toFixed(4));
+
+    inputLat.value = validLat;
+    inputLng.value = validLng;
+
+    if (farmMarker) {
+      farmMarker.setLatLng([validLat, validLng]);
+      farmMarker.setPopupContent(`
+        <div style="font-family: system-ui, sans-serif; font-size: 12px; color: #171717;">
+          <strong style="color: #10b981;">🌱 Farm Location</strong><br>
+          <span style="font-family: monospace;">${validLat}° N, ${validLng}° E</span><br>
+          <span style="color: #666; font-size: 11px;">Drag marker or click map to change</span>
+        </div>
+      `);
+    }
+
+    if (farmAccuracyCircle) {
+      farmAccuracyCircle.setLatLng([validLat, validLng]);
+    }
+
+    if (fly && map) {
+      map.flyTo([validLat, validLng], zoom || 13, { duration: 0.8 });
+    }
+
+    resolveLocalityName(validLat, validLng);
+
+    if (triggerRecalc) {
+      handleFormSubmit();
+    }
+  }
+
+  let reverseGeocodeTimer = null;
+  function resolveLocalityName(lat, lng) {
+    if (!localityText) return;
+    localityText.textContent = `Resolving locality (${lat}° N, ${lng}° E)...`;
+
+    clearTimeout(reverseGeocodeTimer);
+    reverseGeocodeTimer = setTimeout(async function () {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`, {
+          headers: { 'Accept': 'application/json', 'User-Agent': 'NASAFieldFarmPortal/1.0' }
+        });
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (data && data.display_name) {
+          localityText.textContent = data.display_name;
+        } else {
+          localityText.textContent = `Agricultural Field Coordinates (${lat}° N, ${lng}° E)`;
+        }
+      } catch (e) {
+        localityText.textContent = `Agricultural Field Coordinates (${lat}° N, ${lng}° E)`;
+      }
+    }, 450);
+  }
+
+  async function searchLocationOnMap(query) {
+    if (!query || !query.trim() || !map) return;
+    btnMapSearch.textContent = 'Searching...';
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`, {
+        headers: { 'Accept': 'application/json', 'User-Agent': 'NASAFieldFarmPortal/1.0' }
+      });
+      const data = await res.json();
+      if (data && data.length > 0) {
+        const item = data[0];
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+        updateCoordinatesFromMap(lat, lon, true, 13, true);
+        if (localityText) localityText.textContent = item.display_name;
+      } else {
+        alert(`Location "${query}" not found. You can click directly on the map.`);
+      }
+    } catch (e) {
+      console.warn('Search failed:', e);
+    } finally {
+      btnMapSearch.textContent = 'Search';
+    }
+  }
 
   // --- 3. Agro-Ecological Computation Engine ---
   function computeAgroMetrics(lat, lng, crop, season, soil, irrigation) {
@@ -280,8 +483,13 @@
     btn.addEventListener('click', function () {
       presetPills.forEach(function (p) { p.classList.remove('active'); });
       btn.classList.add('active');
-      inputLat.value = btn.getAttribute('data-lat');
-      inputLng.value = btn.getAttribute('data-lng');
+      const lat = parseFloat(btn.getAttribute('data-lat'));
+      const lng = parseFloat(btn.getAttribute('data-lng'));
+      inputLat.value = lat;
+      inputLng.value = lng;
+      if (typeof updateCoordinatesFromMap === 'function') {
+        updateCoordinatesFromMap(lat, lng, true, 12, false);
+      }
       handleFormSubmit();
     });
   });
@@ -295,8 +503,10 @@
     btnDeviceGps.textContent = 'Locating...';
     navigator.geolocation.getCurrentPosition(
       function (pos) {
-        inputLat.value = pos.coords.latitude.toFixed(4);
-        inputLng.value = pos.coords.longitude.toFixed(4);
+        const lat = parseFloat(pos.coords.latitude.toFixed(4));
+        const lng = parseFloat(pos.coords.longitude.toFixed(4));
+        inputLat.value = lat;
+        inputLng.value = lng;
         btnDeviceGps.innerHTML = `
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle>
@@ -304,6 +514,9 @@
           GPS Locked
         `;
         presetPills.forEach(function (p) { p.classList.remove('active'); });
+        if (typeof updateCoordinatesFromMap === 'function') {
+          updateCoordinatesFromMap(lat, lng, true, 14, false);
+        }
         handleFormSubmit();
       },
       function () {
@@ -469,5 +682,6 @@
 
   // Initialize
   initTheme();
+  initLeafletMap();
   handleFormSubmit();
 })();

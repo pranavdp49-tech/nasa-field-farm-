@@ -417,6 +417,151 @@ button:disabled, select:disabled, input:disabled {
   font-family: var(--font-mono);
 }
 
+/* Leaflet GIS Map Component (AMX Integration) */
+.leaflet-map-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.map-header-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .map-header-bar {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+}
+
+.map-controls-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.map-layer-pills {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--surface-soft-2);
+  padding: 0.2rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--line);
+}
+
+.map-layer-pills .preset-pill-btn {
+  min-height: 1.85rem;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.725rem;
+}
+
+.map-search-inline {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.map-search-inline input {
+  height: 2.15rem;
+  padding: 0 0.65rem;
+  font-size: 0.8rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  color: var(--text-strong);
+  width: 220px;
+}
+
+.map-search-inline input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.map-search-inline button {
+  height: 2.15rem;
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+}
+
+.amx-map-container {
+  width: 100%;
+  height: 380px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-strong);
+  background: var(--surface-soft-2);
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+  z-index: 1;
+}
+
+.map-locality-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  color: var(--text-body);
+}
+
+.locality-icon {
+  font-size: 0.95rem;
+}
+
+.locality-label {
+  font-weight: 600;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.locality-value {
+  font-weight: 600;
+  color: var(--text-strong);
+  font-family: var(--font-mono);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Custom Leaflet Marker */
+.farm-leaflet-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.farm-leaflet-pin .pin-body {
+  width: 32px;
+  height: 32px;
+  border-radius: 50% 50% 50% 0;
+  background: #10b981;
+  position: absolute;
+  transform: rotate(-45deg);
+  left: 50%;
+  top: 50%;
+  margin: -16px 0 0 -16px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35);
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.farm-leaflet-pin .pin-icon {
+  transform: rotate(45deg);
+  font-size: 15px;
+}
+
 /* Quick Coordinate Presets */
 .preset-pills-row {
   display: flex;

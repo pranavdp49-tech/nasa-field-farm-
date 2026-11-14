@@ -563,6 +563,20 @@
             <div class="telemetry-value" id="matrix-prectot">420 mm</div>
             <p class="telemetry-desc">Precipitation Corrected (90-day sum). Satellite microwave &amp; gauge merged.</p>
           </div>
+
+          <!-- Sensor 5: Farm Elevation (Index 2 of geometry.coordinates) -->
+          <div class="telemetry-tile telemetry-tile-elevation">
+            <span class="telemetry-param-name">NASA Terrain Check</span>
+            <div class="telemetry-value" id="matrix-elevation">274 m</div>
+            <p class="telemetry-desc">Farm Elevation (Index 2 in geometry coordinates). Terrain topographic height.</p>
+          </div>
+
+          <!-- Sensor 6: Response Quality & Missing Sentinel Check -->
+          <div class="telemetry-tile telemetry-tile-quality">
+            <span class="telemetry-param-name">Quality: Fill Value -999</span>
+            <div class="telemetry-value" id="matrix-data-quality">90 / 90 Days</div>
+            <p class="telemetry-desc" id="matrix-quality-desc">Warning flag active: automatically filters out any fill value of -999.</p>
+          </div>
         </div>
       </div>
     </section>

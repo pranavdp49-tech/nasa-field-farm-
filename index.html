@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NASA FieldFarm : Agro-Ecological Decision System</title>
+  <meta name="description" content="Precision agro-ecological rotation system integrating NASA SMAP, MODIS, and POWER datasets for climate-resilient field farming.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Keyboard Skip Link (R-32, R-39) -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Header & Navigation Bar -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="#main-content" class="brand-wrapper" aria-label="NASA FieldFarm Home">
+        <div class="brand-icon-box" aria-hidden="true">
+          <!-- Satellite telemetry icon -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"></path>
+          </svg>
+        </div>
+        <span class="brand-title">NASA FieldFarm</span>
+        <span class="brand-tag">Agro-Ecological System</span>
+      </a>
+
+      <!-- Real Nav Destinations (R-24) -->
+      <nav aria-label="Primary Navigation">
+        <ul class="nav-links">
+          <li><a href="#problem" class="nav-link">Farmer Crisis</a></li>
+          <li><a href="#input-layer" class="nav-link">Field Inputs</a></li>
+          <li><a href="#output-strategies" class="nav-link">Rotation Strategies</a></li>
+          <li><a href="#nasa-telemetry" class="nav-link">NASA Telemetry</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <!-- Working Theme Toggle Button (R-21, R-34) -->
+        <button type="button" id="theme-toggle" class="theme-toggle-btn" aria-label="Switch between light and dark theme" title="Toggle theme">
+          <svg class="sun-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="4"></circle>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-content">
+    <!-- SECTION 1: Problem Diagnosis (User Image 1) -->
+    <section id="problem" class="section-problem">
+      <div class="container">
+        <span class="eyebrow">Agro-Ecological Diagnosis</span>
+        <h1 class="section-title">The Problem: Why the Farmer Is Struggling</h1>
+        <p class="section-lead">Continuous single-crop farming under compounding climate stress causes systemic yield loss, water exhaustion, and depleted soil biology.</p>
+
+        <div class="problem-grid">
+          <!-- Card 1: Heat & Rain -->
+          <article class="problem-card">
+            <div class="problem-card-header">
+              <div class="problem-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 9V2M12 22v-4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h7M15 12h7M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                </svg>
+              </div>
+              <h3>1. Volatile Weather</h3>
+            </div>
+            <p>Weather is changing: increased heat waves, thermal stress spikes, and unpredictable rainfall timing during crucial vegetative windows.</p>
+            <div class="problem-metric-tag">
+              <span aria-hidden="true">Observation:</span> NASA POWER 2m Air Temp &amp; GPM Precip
+            </div>
+          </article>
+
+          <!-- Card 2: Water Drying Up -->
+          <article class="problem-card">
+            <div class="problem-card-header">
+              <div class="problem-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                </svg>
+              </div>
+              <h3>2. Vanishing Water</h3>
+            </div>
+            <p>Water is running out: underground aquifers and topsoil moisture reserves are critically depleting under intensive irrigation demands.</p>
+            <div class="problem-metric-tag">
+              <span aria-hidden="true">Observation:</span> SMAP L4 GWETTOP Surface Wetness
+            </div>
+          </article>
+
+          <!-- Card 3: Tired Soil -->
+          <article class="problem-card">
+            <div class="problem-card-header">
+              <div class="problem-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+              </div>
+              <h3>3. Tired, Mining Soil</h3>
+            </div>
+            <p>Tired soil: planting the same crop season after season drains the nitrogen reserve, degrades organic carbon, and leaves fields exposed to erosion.</p>
+            <div class="problem-metric-tag">
+              <span aria-hidden="true">Observation:</span> MODIS NDVI Vegetative Ground Cover
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: User Input Layer (User Image 2) -->
+    <section id="input-layer" class="section-input">
+      <div class="container">
+        <span class="eyebrow">Input Layer : Frontend Client</span>
+        <h2 class="section-title">Field Parameters &amp; Satellite Localization</h2>
+        <p class="section-lead">Input your farm location and baseline crop to pull localized NASA soil moisture, precipitation, and thermal metrics.</p>
+
+        <div class="input-container-card">
+          <form id="farm-input-form" novalidate>
+            <div class="input-form-grid">
+              <!-- Field 1: Coordinates -->
+              <div class="field-col-6 form-group">
+                <div class="form-label">
+                  <label for="input-latitude">GPS Latitude</label>
+                  <span class="form-subtext">Coordinate (-90.0 to 90.0)</span>
+                </div>
+                <input type="number" id="input-latitude" class="input-field mono" value="20.5937" step="any" min="-90" max="90" required>
+              </div>
+
+              <div class="field-col-6 form-group">
+                <div class="form-label">
+                  <label for="input-longitude">GPS Longitude</label>
+                  <span class="form-subtext">Coordinate (-180.0 to 180.0)</span>
+                </div>
+                <input type="number" id="input-longitude" class="input-field mono" value="78.9629" step="any" min="-180" max="180" required>
+              </div>
+
+              <!-- Quick Presets Row -->
+              <div class="field-col-12 form-group">
+                <span class="form-label">Quick Regional Presets</span>
+                <div class="preset-pills-row" role="group" aria-label="Regional Agro-Ecological Presets">
+                  <button type="button" class="preset-pill-btn active" data-lat="20.5937" data-lng="78.9629" data-name="Deccan Plateau Semi-Arid">Deccan Plateau (Semi-Arid)</button>
+                  <button type="button" class="preset-pill-btn" data-lat="30.9010" data-lng="75.8573" data-name="Punjab Canal Plain">Punjab Plain (Canal Irrigated)</button>
+                  <button type="button" class="preset-pill-btn" data-lat="25.5941" data-lng="85.1376" data-name="Indo-Gangetic Basin">Indo-Gangetic (Alluvial Basin)</button>
+                  <button type="button" class="preset-pill-btn" data-lat="21.7645" data-lng="72.1519" data-name="Gujarat Dryland">Gujarat Coastal Belt</button>
+                  <button type="button" id="btn-device-gps" class="preset-pill-btn" title="Detect device geolocation">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    Use Device GPS
+                  </button>
+                </div>
+              </div>
+
+              <!-- Field 2: Baseline Crop Input -->
+              <div class="field-col-6 form-group">
+                <label for="select-baseline-crop" class="form-label">Baseline Crop Input</label>
+                <select id="select-baseline-crop" class="input-field">
+                  <option value="Rice" selected>Rice (Paddy - Intensive Water Demand)</option>
+                  <option value="Cotton">Cotton (High Thermal &amp; Pest Sensitivity)</option>
+                  <option value="Wheat">Wheat (Terminal Heat Risk)</option>
+                  <option value="Sugarcane">Sugarcane (Perennial Water Mining)</option>
+                  <option value="Maize">Maize (Moderate Water Demand)</option>
+                </select>
+              </div>
+
+              <!-- Field 3: Time Window / Target Season -->
+              <div class="field-col-6 form-group">
+                <span class="form-label">Target Growing Season</span>
+                <div class="segment-group" role="radiogroup" aria-label="Target Growing Season">
+                  <div class="segment-item">
+                    <input type="radio" id="season-kharif" name="growing_season" value="Kharif" checked>
+                    <label for="season-kharif" class="segment-label">Kharif (Monsoon)</label>
+                  </div>
+                  <div class="segment-item">
+                    <input type="radio" id="season-rabi" name="growing_season" value="Rabi">
+                    <label for="season-rabi" class="segment-label">Rabi (Winter)</label>
+                  </div>
+                  <div class="segment-item">
+                    <input type="radio" id="season-summer" name="growing_season" value="Summer">
+                    <label for="season-summer" class="segment-label">Summer (Zaid)</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Additional Field: Soil & Water Profile -->
+              <div class="field-col-6 form-group">
+                <label for="select-soil-profile" class="form-label">Soil Texture Profile</label>
+                <select id="select-soil-profile" class="input-field">
+                  <option value="black_vertisol" selected>Black Vertisol (High Water Retention)</option>
+                  <option value="alluvial_loam">Alluvial Loam (Balanced Porosity)</option>
+                  <option value="red_sandy">Red Sandy Soil (Rapid Drainage)</option>
+                  <option value="clay_compact">Heavy Clay (Prone to Waterlogging)</option>
+                </select>
+              </div>
+
+              <div class="field-col-6 form-group">
+                <label for="select-irrigation-type" class="form-label">Irrigation System</label>
+                <select id="select-irrigation-type" class="input-field">
+                  <option value="rainfed" selected>Pure Rainfed (High Climate Sensitivity)</option>
+                  <option value="tubewell">Groundwater Tubewell (Aquifer Extraction)</option>
+                  <option value="canal">Canal Gravity Feed (Rotational Supply)</option>
+                  <option value="drip">Micro-Irrigation / Drip (Precision System)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Action Bar -->
+            <div class="form-action-bar">
+              <div class="satellite-status-chip">
+                <span class="status-dot" aria-hidden="true"></span>
+                <span id="telemetry-status-text">NASA SMAP, MODIS, and POWER active</span>
+              </div>
+              <div class="action-buttons-group">
+                <button type="button" id="btn-reset-form" class="btn-secondary">Reset Parameters</button>
+                <button type="submit" id="btn-submit-form" class="btn-primary">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                    <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                    <path d="M16 21h5v-5"></path>
+                  </svg>
+                  Run Satellite Assessment
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- UI State: Loading State (R-27) -->
+        <div id="state-loading" class="state-container" aria-live="polite">
+          <div class="spinner" aria-hidden="true"></div>
+          <h3 class="state-title" style="margin-top: 1rem;">Retrieving NASA Earth Observations</h3>
+          <p class="state-description">Processing SMAP surface soil moisture rasters, MODIS vegetation indices, and localized evaporative demand for the given coordinates.</p>
+        </div>
+
+        <!-- UI State: Empty State (R-27) -->
+        <div id="state-empty" class="state-container">
+          <div class="state-icon-box" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+            </svg>
+          </div>
+          <h3 class="state-title">No Field Parameters Selected</h3>
+          <p class="state-description">Parameters were reset. Choose a regional preset or input farm coordinates above to generate strategy comparison cards.</p>
+          <button type="button" id="btn-empty-restore" class="btn-primary">Load Regional Preset</button>
+        </div>
+
+        <!-- UI State: Error State (R-27) -->
+        <div id="state-error" class="state-container" role="alert">
+          <div class="state-icon-box" style="color: var(--danger);" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3 class="state-title" id="error-title">Invalid Coordinates Detected</h3>
+          <p class="state-description" id="error-message">The specified location falls outside valid terrestrial agro-climatic zones. Please check the latitude and longitude inputs.</p>
+          <button type="button" id="btn-error-reset" class="btn-secondary">Reset to Deccan Plateau</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: The Output Layer (User Image 3, Styled like AMX) -->
+    <section id="output-strategies" class="section-strategies">
+      <div class="container">
+        <div class="strategies-header-row">
+          <div>
+            <span class="eyebrow">Output Layer : Comparison Cards</span>
+            <h2 class="section-title">Agro-Ecological Rotation Strategies</h2>
+            <p class="section-lead">Algorithmic evaluation comparing current monocrop exposure against drought-resilient and soil-regenerative paths.</p>
+          </div>
+          <div>
+            <button type="button" id="btn-view-raw-json" class="btn-secondary" title="View underlying JSON payload">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+              </svg>
+              View JSON Response
+            </button>
+          </div>
+        </div>
+
+        <!-- AMX Card Grid (3 Columns) -->
+        <div id="strategies-card-grid" class="strategies-grid">
+
+          <!-- Strategy A: Baseline Monocrop (Control Group) -->
+          <article class="amx-strategy-card" style="--accent-a:#ef4444; --accent-b:#f59e0b;" data-strategy-id="strategy_a">
+            <!-- Top Hairline Accent Gradient -->
+            <span class="card-top-hairline" aria-hidden="true"></span>
+            <!-- Ambient Hover Glow -->
+            <span class="card-ambient-glow" aria-hidden="true"></span>
+
+            <!-- Top Row: Icon + Status Chip -->
+            <div class="card-header-row">
+              <div class="card-icon-container">
+                <div class="card-icon-img" aria-hidden="true">
+                  <!-- Monocrop warning icon -->
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                    <line x1="12" y1="9" x2="12" y2="13"></line>
+                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                  </svg>
+                </div>
+              </div>
+              <span class="card-status-chip">Control Group</span>
+            </div>
+
+            <!-- Title & Description -->
+            <h3 class="card-title">Strategy A: Baseline Monocrop</h3>
+            <p class="card-description">Continuous single-crop cycle maintained under current management practices without rotational breaks or moisture hedging.</p>
+
+            <!-- Feature / Parameter Checklist -->
+            <ul class="card-checklist">
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="8" x2="12" y2="12"></line>
+                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <span>High evapotranspiration (ET) demand: <strong id="val-et-demand">680 mm</strong></span>
+              </li>
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+                <span>Negative nitrogen balance: <strong id="val-nitrogen-deficit">-52 kg N/ha</strong></span>
+              </li>
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                </svg>
+                <span>Climate vulnerability index: <strong id="val-risk-score">0.86 (High Risk)</strong></span>
+              </li>
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                </svg>
+                <span>Aquifer pressure: Rapid groundwater extraction</span>
+              </li>
+            </ul>
+
+            <!-- Footer: Spec Metadata & Action -->
+            <div class="card-footer">
+              <dl class="card-specs-list">
+                <div><dt class="sr-only">Crop Water Demand</dt><dd>ET: Severe</dd></div>
+                <span class="spec-divider" aria-hidden="true">·</span>
+                <div><dt class="sr-only">Soil Moisture Condition</dt><dd>GWETTOP: Risk</dd></div>
+                <span class="spec-divider" aria-hidden="true">·</span>
+                <div><dt class="sr-only">Nitrogen Balance</dt><dd>N-Loss: High</dd></div>
+              </dl>
+              <button type="button" class="card-action-btn" data-modal-target="strategy_a">
+                <span>Inspect Stress Metrics</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h13M12 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </article>
+
+          <!-- Strategy B: Drought-Resilient Rotation (Water Optimization Path) -->
+          <article class="amx-strategy-card" style="--accent-a:#06b6d4; --accent-b:#0df2bd;" data-strategy-id="strategy_b">
+            <span class="card-top-hairline" aria-hidden="true"></span>
+            <span class="card-ambient-glow" aria-hidden="true"></span>
+
+            <div class="card-header-row">
+              <div class="card-icon-container">
+                <div class="card-icon-img" aria-hidden="true">
+                  <!-- C4 grain / Sorghum icon -->
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a10 10 0 0 1 10 10c0 5.52-4.48 10-10 10S2 17.52 2 12 6.48 2 12 2z"></path>
+                    <path d="M12 6v12M8 10l4-4 4 4M8 14l4 4 4-4"></path>
+                  </svg>
+                </div>
+              </div>
+              <span class="card-status-chip">Water-Optimization Path</span>
+            </div>
+
+            <h3 class="card-title">Strategy B: Drought-Resilient Rotation</h3>
+            <p class="card-description">Strategic shift to high water-use efficiency crops triggered when NASA satellite surface wetness indicates soil moisture deficits.</p>
+
+            <ul class="card-checklist">
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+                <span>Low Crop Water Requirement (CWR): <strong id="val-cwr-metric">340 mm (Below 400mm)</strong></span>
+              </li>
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+                <span>C4 photosynthetic cereal match: <strong id="val-c4-crop">Sorghum / Pearl Millet</strong></span>
+              </li>
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+                <span>Trigger rule: Active when NASA GWETTOP drops below <strong>0.40</strong></span>
+              </li>
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+                <span>Irrigation savings: <strong id="val-water-saved">~46% reduction vs baseline</strong></span>
+              </li>
+            </ul>
+
+            <div class="card-footer">
+              <dl class="card-specs-list">
+                <div><dt class="sr-only">Crop Water Requirement</dt><dd>CWR: &lt;400mm</dd></div>
+                <span class="spec-divider" aria-hidden="true">·</span>
+                <div><dt class="sr-only">Satellite Trigger</dt><dd>GWETTOP &lt;0.40</dd></div>
+                <span class="spec-divider" aria-hidden="true">·</span>
+                <div><dt class="sr-only">Physiology</dt><dd>C4 Pathway</dd></div>
+              </dl>
+              <button type="button" class="card-action-btn" data-modal-target="strategy_b">
+                <span>Simulate Water Savings</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h13M12 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </article>
+
+          <!-- Strategy C: Legume Cover / Intercrop (Soil Regeneration Path) -->
+          <article class="amx-strategy-card" style="--accent-a:#10b981; --accent-b:#84cc16;" data-strategy-id="strategy_c">
+            <span class="card-top-hairline" aria-hidden="true"></span>
+            <span class="card-ambient-glow" aria-hidden="true"></span>
+
+            <div class="card-header-row">
+              <div class="card-icon-container">
+                <div class="card-icon-img" aria-hidden="true">
+                  <!-- Legume leaf / biofixation icon -->
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22v-9"></path>
+                    <path d="M12 13a6 6 0 0 0-6-6H3v2a6 6 0 0 0 6 6h3z"></path>
+                    <path d="M12 9a6 6 0 0 1 6-6h3v2a6 6 0 0 1-6 6h-3z"></path>
+                  </svg>
+                </div>
+              </div>
+              <span class="card-status-chip">Soil-Regeneration Path</span>
+            </div>
+
+            <h3 class="card-title">Strategy C: Legume Intercrop</h3>
+            <p class="card-description">Integration of pulse legumes to biologically fix atmospheric nitrogen, build soil organic carbon, and prevent bare ground erosion.</p>
+
+            <ul class="card-checklist">
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+                <span>Biological Nitrogen Fixation: <strong id="val-bnf-gain">+58 kg N/ha net gain</strong></span>
+              </li>
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+                <span>Soil Organic Matter (SOM): <strong id="val-som-gain">+0.38% increase per year</strong></span>
+              </li>
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+                <span>Vegetative ground canopy: <strong id="val-ndvi-cover">MODIS NDVI &gt; 0.58</strong></span>
+              </li>
+              <li class="checklist-item">
+                <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+                <span>Synthetic fertilizer offset: <strong>Reduces urea need by ~40%</strong></span>
+              </li>
+            </ul>
+
+            <div class="card-footer">
+              <dl class="card-specs-list">
+                <div><dt class="sr-only">Nitrogen Fixation</dt><dd>BNF: +40 to +80</dd></div>
+                <span class="spec-divider" aria-hidden="true">·</span>
+                <div><dt class="sr-only">Soil Organic Matter</dt><dd>SOM Boost</dd></div>
+                <span class="spec-divider" aria-hidden="true">·</span>
+                <div><dt class="sr-only">Ground Cover</dt><dd>NDVI &gt;0.55</dd></div>
+              </dl>
+              <button type="button" class="card-action-btn" data-modal-target="strategy_c">
+                <span>View Soil Recovery Plan</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h13M12 5l7 7-7 7"></path>
+                </svg>
+              </button>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: Live Telemetry Matrix -->
+    <section id="nasa-telemetry" class="section-telemetry">
+      <div class="container">
+        <span class="eyebrow">Remote Sensing Engine</span>
+        <h2 class="section-title">Localized NASA Earth Observation Matrix</h2>
+        <p class="section-lead">Live telemetry streams dynamically localized for coordinates <span id="telemetry-coord-display" class="mono font-bold">20.5937° N, 78.9629° E</span>.</p>
+
+        <div class="telemetry-grid">
+          <!-- Sensor 1: GWETTOP -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">SMAP L4_SM</span>
+            <div class="telemetry-value" id="matrix-gwettop">0.34</div>
+            <p class="telemetry-desc">Surface Soil Wetness (0 to 1). Triggers C4 rotation switch when &lt; 0.40.</p>
+          </div>
+
+          <!-- Sensor 2: NDVI -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">MODIS MOD13A2</span>
+            <div class="telemetry-value" id="matrix-ndvi">0.38</div>
+            <p class="telemetry-desc">Normalized Difference Vegetation Index. Measures current green vegetative canopy.</p>
+          </div>
+
+          <!-- Sensor 3: Reference ET -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">NASA POWER ET_0</span>
+            <div class="telemetry-value" id="matrix-et0">5.8 mm/d</div>
+            <p class="telemetry-desc">Atmospheric evaporative demand driving plant water consumption.</p>
+          </div>
+
+          <!-- Sensor 4: Precipitation -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">GPM IMERG</span>
+            <div class="telemetry-value" id="matrix-prectot">420 mm</div>
+            <p class="telemetry-desc">Cumulative seasonal precipitation estimate from satellite microwave and radar.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Technical Detail Modal (R-26, R-32) -->
+  <div id="strategy-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-header-text">
+          <h2 id="modal-title">Strategy Technical Specification</h2>
+          <p id="modal-subtitle">NASA agronomic model telemetry and calculation breakdown</p>
+        </div>
+        <button type="button" id="modal-close-btn" class="modal-close-btn" aria-label="Close dialog window">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body" id="modal-content">
+        <!-- Content injected dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p class="footer-text">
+        NASA FieldFarm : Open agro-ecological intelligence using NASA Earth Science Data Systems (ESDS).
+      </p>
+      <nav aria-label="Footer navigation">
+        <ul class="footer-nav">
+          <li><a href="#problem" class="footer-link">Problem Diagnostics</a></li>
+          <li><a href="#input-layer" class="footer-link">Field Parameters</a></li>
+          <li><a href="#output-strategies" class="footer-link">Rotation Strategies</a></li>
+          <li><a href="#nasa-telemetry" class="footer-link">NASA Telemetry</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

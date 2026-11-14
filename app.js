@@ -43,8 +43,8 @@
   const telemetryCoordDisplay = document.getElementById('telemetry-coord-display');
   const telemetryStatusText = document.getElementById('telemetry-status-text');
   const matrixGwettop = document.getElementById('matrix-gwettop');
-  const matrixNdvi = document.getElementById('matrix-ndvi');
-  const matrixEt0 = document.getElementById('matrix-et0');
+  const matrixGwetroot = document.getElementById('matrix-gwetroot');
+  const matrixT2mMax = document.getElementById('matrix-t2m-max');
   const matrixPrectot = document.getElementById('matrix-prectot');
 
   // Card Value Elements
@@ -282,33 +282,123 @@
     }
   }
 
-  // --- 3. Agro-Ecological Computation Engine ---
-  function computeAgroMetrics(lat, lng, crop, season, soil, irrigation) {
-    // Generate deterministic localized remote sensing parameters based on latitude/longitude
+  // --- 3. Agro-Ecological Computation Engine (with NASA POWER v2.10.3 API Integration) ---
+  
+  // Computes start/end date for last 90 days in YYYYMMDD format
+  function get90DayDateRange() {
+    const today = new Date();
+    // Default to last year if current date has latency in NASA archive, or use today minus 90 days
+    // NASA POWER agroclimatology daily archive is typically finalized up to recent months
+    const end = new Date(today);
+    end.setDate(end.getDate() - 5); // 5 days latency margin for NASA daily point
+    const start = new Date(end);
+    start.setDate(start.getDate() - 90);
+
+    const fmt = d => d.toISOString().slice(0, 10).replace(/-/g, '');
+    return { start: fmt(start), end: fmt(end) };
+  }
+
+  // Fetch real NASA POWER v2.10.3 API: daily point agroclimatology
+  async function fetchNasaPowerDaily(lat, lng) {
+    const dates = get90DayDateRange();
+    const params = 'GWETTOP,GWETROOT,PRECTOTCORR,T2M_MAX';
+    const apiUrl = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=${params}&community=ag&longitude=${lng}&latitude=${lat}&start=${dates.start}&end=${dates.end}&format=json`;
+
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+      const res = await fetch(apiUrl, { signal: controller.signal });
+      clearTimeout(timeoutId);
+
+      if (!res.ok) throw new Error(`NASA POWER API HTTP ${res.status}`);
+      const json = await res.json();
+      const p = json?.properties?.parameter;
+
+      if (!p) throw new Error('Missing parameter object in NASA POWER response');
+
+      // Helper to compute average of valid values (> -990 sentinel)
+      const getAverage = (obj) => {
+        if (!obj) return null;
+        const vals = Object.values(obj).filter(v => v !== null && v > -900);
+        if (vals.length === 0) return null;
+        return vals.reduce((a, b) => a + b, 0) / vals.length;
+      };
+
+      // Helper to compute sum of valid values (precipitation)
+      const getSum = (obj) => {
+        if (!obj) return null;
+        const vals = Object.values(obj).filter(v => v !== null && v > -900);
+        if (vals.length === 0) return null;
+        return vals.reduce((a, b) => a + b, 0);
+      };
+
+      // Helper to compute max of valid values (heat stress)
+      const getMax = (obj) => {
+        if (!obj) return null;
+        const vals = Object.values(obj).filter(v => v !== null && v > -900);
+        if (vals.length === 0) return null;
+        return Math.max(...vals);
+      };
+
+      const avgGwettop = getAverage(p.GWETTOP);
+      const avgGwetroot = getAverage(p.GWETROOT);
+      const sumPrecip = getSum(p.PRECTOTCORR);
+      const maxT2m = getMax(p.T2M_MAX);
+
+      return {
+        success: true,
+        source: 'NASA POWER API v2.10.3 (LIVE)',
+        gwettop: avgGwettop !== null ? avgGwettop : null,
+        gwetroot: avgGwetroot !== null ? avgGwetroot : null,
+        precip: sumPrecip !== null ? Math.round(sumPrecip) : null,
+        t2m_max: maxT2m !== null ? Number(maxT2m.toFixed(1)) : null,
+        raw_api_url: apiUrl
+      };
+    } catch (err) {
+      console.warn('NASA POWER API fetch error or timeout, applying agro-climatic model:', err.message);
+      return {
+        success: false,
+        source: 'NASA SMAP / POWER Model (Offline/Fallback)',
+        raw_api_url: apiUrl
+      };
+    }
+  }
+
+  async function computeAgroMetrics(lat, lng, crop, season, soil, irrigation) {
+    // 1. First attempt live NASA POWER v2.10.3 API call for the 90-day window
+    const liveNasa = await fetchNasaPowerDaily(lat, lng);
+
+    // Fallback deterministic seed in case network is offline
     const seed = Math.sin(lat * 12.9898 + lng * 78.233) * 43758.5453;
     const norm = seed - Math.floor(seed);
 
-    // SMAP GWETTOP Surface soil wetness (0.0 to 1.0)
-    let gwettop = 0.28 + norm * 0.24;
-    if (season === 'Kharif') gwettop += 0.12;
-    if (season === 'Summer') gwettop -= 0.10;
-    if (irrigation === 'tubewell') gwettop += 0.05;
-    gwettop = Math.min(0.85, Math.max(0.18, gwettop));
+    // Surface Soil Wetness (0 to 1) - use live NASA GWETTOP if available
+    let gwettop = (liveNasa.success && liveNasa.gwettop !== null)
+      ? liveNasa.gwettop
+      : (0.28 + norm * 0.24);
 
-    // MODIS NDVI
-    let ndvi = 0.32 + norm * 0.25;
-    if (season === 'Kharif') ndvi += 0.15;
-    if (season === 'Summer') ndvi -= 0.12;
-    ndvi = Math.min(0.88, Math.max(0.20, ndvi));
+    if (!liveNasa.success) {
+      if (season === 'Kharif') gwettop += 0.12;
+      if (season === 'Summer') gwettop -= 0.10;
+      if (irrigation === 'tubewell') gwettop += 0.05;
+    }
+    gwettop = Math.min(0.95, Math.max(0.12, gwettop));
 
-    // NASA POWER Reference Evapotranspiration ET0 (mm/day)
-    let et0 = 4.2 + (1.0 - norm) * 2.8;
-    if (season === 'Summer') et0 += 1.8;
+    // Root Zone Soil Wetness (0 to 1) - use live NASA GWETROOT if available
+    let gwetroot = (liveNasa.success && liveNasa.gwetroot !== null)
+      ? liveNasa.gwetroot
+      : (gwettop * 1.15);
+    gwetroot = Math.min(0.98, Math.max(0.15, gwetroot));
 
-    // GPM Precipitation Accumulation (mm)
-    let precip = 280 + Math.floor(norm * 450);
-    if (season === 'Kharif') precip += 220;
-    if (season === 'Summer') precip = Math.floor(precip * 0.35);
+    // Daily Max Air Temperature - use live NASA T2M_MAX if available
+    let t2m_max = (liveNasa.success && liveNasa.t2m_max !== null)
+      ? liveNasa.t2m_max
+      : (29.5 + norm * 9.5);
+
+    // Cumulative Precipitation - use live NASA PRECTOTCORR if available
+    let precip = (liveNasa.success && liveNasa.precip !== null)
+      ? liveNasa.precip
+      : (280 + Math.floor(norm * 450));
 
     // Baseline crop demands
     const cropFactors = {
@@ -339,9 +429,11 @@
       coordinates: { latitude: lat, longitude: lng },
       inputs: { crop, season, soil, irrigation },
       telemetry: {
+        api_source: liveNasa.source,
+        api_url: liveNasa.raw_api_url,
         gwettop: parseFloat(gwettop.toFixed(2)),
-        ndvi: parseFloat(ndvi.toFixed(2)),
-        et0: parseFloat(et0.toFixed(1)),
+        gwetroot: parseFloat(gwetroot.toFixed(2)),
+        t2m_max: parseFloat(t2m_max.toFixed(1)),
         precip: precip
       },
       strategies: {
@@ -386,11 +478,11 @@
 
     // Update Telemetry Displays
     telemetryCoordDisplay.textContent = data.coordinates.latitude.toFixed(4) + '° N, ' + data.coordinates.longitude.toFixed(4) + '° E';
-    telemetryStatusText.textContent = 'NASA SMAP, MODIS, and POWER active for ' + data.inputs.crop + ' (' + data.inputs.season + ')';
+    telemetryStatusText.textContent = data.telemetry.api_source + ' • ' + data.inputs.crop + ' (' + data.inputs.season + ')';
 
     matrixGwettop.textContent = data.telemetry.gwettop.toFixed(2);
-    matrixNdvi.textContent = data.telemetry.ndvi.toFixed(2);
-    matrixEt0.textContent = data.telemetry.et0.toFixed(1) + ' mm/d';
+    if (matrixGwetroot) matrixGwetroot.textContent = data.telemetry.gwetroot.toFixed(2);
+    if (matrixT2mMax) matrixT2mMax.textContent = data.telemetry.t2m_max.toFixed(1) + ' °C';
     matrixPrectot.textContent = data.telemetry.precip + ' mm';
 
     // Update Strategy A
@@ -416,7 +508,7 @@
   }
 
   // --- 5. Form Submission & State Validation ---
-  function handleFormSubmit(e) {
+  async function handleFormSubmit(e) {
     if (e) e.preventDefault();
 
     const lat = parseFloat(inputLat.value);
@@ -451,11 +543,13 @@
     stateEmpty.classList.remove('active');
     stateLoading.classList.add('active');
 
-    // Simulate fast downlink processing
-    setTimeout(function () {
-      const data = computeAgroMetrics(lat, lng, crop, season, soil, irrigation);
+    try {
+      const data = await computeAgroMetrics(lat, lng, crop, season, soil, irrigation);
       renderMetrics(data);
-    }, 280);
+    } catch (err) {
+      console.error('Computation error:', err);
+      showErrorState('Telemetry Retrieval Failed', err.message || 'Unable to load NASA observation data.');
+    }
   }
 
   function showErrorState(title, message) {

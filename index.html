@@ -538,30 +538,30 @@
         <div class="telemetry-grid">
           <!-- Sensor 1: GWETTOP -->
           <div class="telemetry-tile">
-            <span class="telemetry-param-name">SMAP L4_SM</span>
+            <span class="telemetry-param-name">NASA POWER GWETTOP</span>
             <div class="telemetry-value" id="matrix-gwettop">0.34</div>
-            <p class="telemetry-desc">Surface Soil Wetness (0 to 1). Triggers C4 rotation switch when &lt; 0.40.</p>
+            <p class="telemetry-desc">Top 5cm Surface Soil Wetness (0 to 1). Triggers C4 rotation switch when &lt; 0.40.</p>
           </div>
 
-          <!-- Sensor 2: NDVI -->
+          <!-- Sensor 2: GWETROOT -->
           <div class="telemetry-tile">
-            <span class="telemetry-param-name">MODIS MOD13A2</span>
-            <div class="telemetry-value" id="matrix-ndvi">0.38</div>
-            <p class="telemetry-desc">Normalized Difference Vegetation Index. Measures current green vegetative canopy.</p>
+            <span class="telemetry-param-name">NASA POWER GWETROOT</span>
+            <div class="telemetry-value" id="matrix-gwetroot">0.42</div>
+            <p class="telemetry-desc">Root Zone Soil Wetness (0 to 1). Critical reservoir for crop flowering &amp; yield.</p>
           </div>
 
-          <!-- Sensor 3: Reference ET -->
+          <!-- Sensor 3: T2M_MAX -->
           <div class="telemetry-tile">
-            <span class="telemetry-param-name">NASA POWER ET_0</span>
-            <div class="telemetry-value" id="matrix-et0">5.8 mm/d</div>
-            <p class="telemetry-desc">Atmospheric evaporative demand driving plant water consumption.</p>
+            <span class="telemetry-param-name">NASA POWER T2M_MAX</span>
+            <div class="telemetry-value" id="matrix-t2m-max">34.2 °C</div>
+            <p class="telemetry-desc">Daily Maximum 2-meter Air Temperature. Flags crop heat stress events.</p>
           </div>
 
           <!-- Sensor 4: Precipitation -->
           <div class="telemetry-tile">
-            <span class="telemetry-param-name">GPM IMERG</span>
+            <span class="telemetry-param-name">NASA POWER PRECTOTCORR</span>
             <div class="telemetry-value" id="matrix-prectot">420 mm</div>
-            <p class="telemetry-desc">Cumulative seasonal precipitation estimate from satellite microwave and radar.</p>
+            <p class="telemetry-desc">Precipitation Corrected (90-day sum). Satellite microwave &amp; gauge merged.</p>
           </div>
         </div>
       </div>

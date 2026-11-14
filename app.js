@@ -49,6 +49,19 @@
   const matrixElevation = document.getElementById('matrix-elevation');
   const matrixDataQuality = document.getElementById('matrix-data-quality');
   const matrixQualityDesc = document.getElementById('matrix-quality-desc');
+  const matrixT2mMin = document.getElementById('matrix-t2m-min');
+  const matrixTs = document.getElementById('matrix-ts');
+  const matrixSolar = document.getElementById('matrix-solar');
+  const matrixHeatWaveDays = document.getElementById('matrix-heat-wave-days');
+  const matrixHotSoilDays = document.getElementById('matrix-hot-soil-days');
+
+  // Heat Warning Banners on Strategy Cards
+  const heatBannerA = document.getElementById('heat-banner-a');
+  const heatTextA = document.getElementById('heat-text-a');
+  const heatBannerB = document.getElementById('heat-banner-b');
+  const heatTextB = document.getElementById('heat-text-b');
+  const heatBannerC = document.getElementById('heat-banner-c');
+  const heatTextC = document.getElementById('heat-text-c');
 
   // Card Value Elements
   const valEtDemand = document.getElementById('val-et-demand');
@@ -304,7 +317,8 @@
   // Fetch real NASA POWER v2.10.3 API: daily point agroclimatology
   async function fetchNasaPowerDaily(lat, lng) {
     const dates = get90DayDateRange();
-    const params = 'GWETTOP,GWETROOT,PRECTOTCORR,T2M_MAX';
+    // Request all NASA POWER parameters from Step 2 & Heat Check architecture
+    const params = 'GWETTOP,GWETROOT,PRECTOTCORR,T2M_MAX,T2M_MIN,TS,ALLSKY_SFC_SW_DWN';
     const apiUrl = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=${params}&community=ag&longitude=${lng}&latitude=${lat}&start=${dates.start}&end=${dates.end}&format=json`;
 
     try {
@@ -320,7 +334,7 @@
       const header = json?.header;
       const fillValue = (header && typeof header.fill_value === 'number') ? header.fill_value : -999.0;
       const geometry = json?.geometry;
-      // Index 0: Lon, Index 1: Lat, Index 2: Farm Elevation in meters
+      // Index 0: Lon, Index 1: Lat, Index 2: Farm Elevation in meters (terrain check)
       const coords = geometry?.coordinates || [];
       const elevation = coords.length >= 3 ? coords[2] : null;
 
@@ -334,14 +348,35 @@
       let validDaysCount = 0;
       let flaggedMissingDays = 0;
 
-      if (p.GWETTOP) {
-        const days = Object.keys(p.GWETTOP);
+      // Calculate 4 Heat Indicators over the last 90 days (Heat Check Architecture Section 3)
+      let peakT2mMax = -999;
+      let heatWaveDays = 0; // count(T2M_MAX > 35°C)
+      let hotSoilDays = 0;  // count(TS > 40°C)
+      let gddAccumulation = 0; // growingDegreeDays: sum(max(0, T_avg - 10°C))
+
+      if (p.T2M_MAX) {
+        const days = Object.keys(p.T2M_MAX);
         totalDays = days.length;
         days.forEach(day => {
-          if (isSentinel(p.GWETTOP[day]) || isSentinel(p.GWETROOT?.[day]) || isSentinel(p.T2M_MAX?.[day])) {
+          const tMax = p.T2M_MAX[day];
+          const tMin = p.T2M_MIN ? p.T2M_MIN[day] : null;
+          const ts = p.TS ? p.TS[day] : null;
+
+          if (isSentinel(tMax)) {
             flaggedMissingDays++;
           } else {
             validDaysCount++;
+            // 1. peakT2mMax
+            if (tMax > peakT2mMax) peakT2mMax = tMax;
+            // 2. heatWaveDays: count(T2M_MAX > 35°C)
+            if (tMax > 35) heatWaveDays++;
+            // 3. hotSoilDays: count(TS > 40°C)
+            if (ts !== null && !isSentinel(ts) && ts > 40) hotSoilDays++;
+            // 4. growingDegreeDays: average daily heat accumulation for crop maturity (base 10°C)
+            if (tMin !== null && !isSentinel(tMin)) {
+              const tAvg = (tMax + tMin) / 2;
+              if (tAvg > 10) gddAccumulation += (tAvg - 10);
+            }
           }
         });
       }
@@ -374,6 +409,10 @@
       const avgGwetroot = getAverage(p.GWETROOT);
       const sumPrecip = getSum(p.PRECTOTCORR);
       const maxT2m = getMax(p.T2M_MAX);
+      const avgT2mMin = getAverage(p.T2M_MIN);
+      const avgTs = getAverage(p.TS);
+      const maxTs = getMax(p.TS);
+      const avgSolar = getAverage(p.ALLSKY_SFC_SW_DWN);
 
       return {
         success: true,
@@ -392,10 +431,27 @@
         gwetroot: avgGwetroot !== null ? avgGwetroot : null,
         precip: sumPrecip !== null ? Math.round(sumPrecip) : null,
         t2m_max: maxT2m !== null ? Number(maxT2m.toFixed(1)) : null,
+        t2m_min: avgT2mMin !== null ? Number(avgT2mMin.toFixed(1)) : null,
+        ts_earth_skin: avgTs !== null ? Number(avgTs.toFixed(1)) : null,
+        ts_max: maxTs !== null ? Number(maxTs.toFixed(1)) : null,
+        solar_radiation: avgSolar !== null ? Number(avgSolar.toFixed(1)) : null,
+        heat_indicators: {
+          peak_t2m_max: peakT2mMax > -900 ? Number(peakT2mMax.toFixed(1)) : null,
+          heat_wave_days: heatWaveDays,
+          hot_soil_days: hotSoilDays,
+          growing_degree_days: Math.round(gddAccumulation)
+        },
         raw_api_url: apiUrl
       };
     } catch (err) {
       console.warn('NASA POWER API fetch error or timeout, applying agro-climatic model:', err.message);
+      // Fallback deterministic thermal values
+      const seed = Math.sin(lat * 12.9898 + lng * 78.233) * 43758.5453;
+      const norm = seed - Math.floor(seed);
+      const simHeatDays = Math.round(8 + norm * 24);
+      const simHotSoilDays = Math.round(simHeatDays * 0.65);
+      const simPeakT2m = Number((34.0 + norm * 8.5).toFixed(1));
+
       return {
         success: false,
         source: 'NASA SMAP / POWER Model (Offline/Fallback)',
@@ -406,6 +462,16 @@
           valid_days: 90,
           flagged_days: 0,
           fill_value_ignored: -999.0
+        },
+        t2m_min: 22.4,
+        ts_earth_skin: 44.8,
+        ts_max: 48.2,
+        solar_radiation: 19.8,
+        heat_indicators: {
+          peak_t2m_max: simPeakT2m,
+          heat_wave_days: simHeatDays,
+          hot_soil_days: simHotSoilDays,
+          growing_degree_days: 1420
         },
         raw_api_url: apiUrl
       };
@@ -473,6 +539,42 @@
     const somGain = (0.30 + norm * 0.18).toFixed(2);
     const ndviCoverVal = (0.55 + norm * 0.12).toFixed(2);
 
+    // Section 4 Decision Matrix: Matching Heat Stress to Crop Biology
+    // Heat Indicators from Section 3
+    const heatWaveDays = liveNasa.heat_indicators ? liveNasa.heat_indicators.heat_wave_days : 0;
+    const hotSoilDays = liveNasa.heat_indicators ? liveNasa.heat_indicators.hot_soil_days : 0;
+    const peakTemp = liveNasa.heat_indicators?.peak_t2m_max !== null ? liveNasa.heat_indicators.peak_t2m_max : t2m_max;
+    const gdd = liveNasa.heat_indicators ? liveNasa.heat_indicators.growing_degree_days : 1400;
+
+    let heatLevel = 'LOW'; // LOW HEAT, MODERATE HEAT, EXTREME HEAT STRIKE
+    let heatDecisionDescription = '';
+    let heatWarningA = '';
+    let heatResilienceB = '';
+    let heatShieldC = '';
+
+    if (heatWaveDays > 25 || peakTemp > 42.0) {
+      // EXTREME HEAT STRIKE: >25 days above 35°C or peak temperature >42°C
+      heatLevel = 'EXTREME';
+      heatDecisionDescription = `Extreme Heat Strike: ${heatWaveDays} days above 35°C with peak ${peakTemp}°C. Switch to C4 heat-adapted crops (Sorghum, Pearl Millet, Pigeonpea / Red Gram) which continue vegetative growth up to 42°C.`;
+      heatWarningA = `Heat Warning: Severe thermal stress (${heatWaveDays} days >35°C, peak ${peakTemp}°C). Extreme pollen sterility, flower drop, and rapid water loss via transpiration in ${crop}.`;
+      heatResilienceB = `Why it wins in High Heat: C4 anatomy partially closes leaf pores (stomata) during peak midday heat to resist lethal dehydration up to 42°C.`;
+      heatShieldC = `Why it helps: Dense leafy canopy provides shade, lowers earth surface skin temperature TS, and shields root moisture GWETROOT.`;
+    } else if (heatWaveDays >= 10 && heatWaveDays <= 25) {
+      // MODERATE HEAT: 10 to 25 days above 35°C
+      heatLevel = 'MODERATE';
+      heatDecisionDescription = `Moderate Thermal Stress: ${heatWaveDays} days above 35°C. Use canopy cover crops (Soybean, Cowpea, Mung Bean) to shade soil and lower skin temperature TS by 4-6°C.`;
+      heatWarningA = `Heat Warning: Moderate thermal stress (${heatWaveDays} days >35°C). Watch for accelerated topsoil drying and floral abortion.`;
+      heatResilienceB = `Why it wins in High Heat: C4 photosynthetic pathway conserves water and maintains biomass synthesis under temperature spikes.`;
+      heatShieldC = `Why it helps: Intercropping with dense shade legumes reduces surface soil heat by 4-6°C and slows evaporation.`;
+    } else {
+      // LOW HEAT: Fewer than 10 days above 35°C
+      heatLevel = 'LOW';
+      heatDecisionDescription = `Low Heat Risk: Only ${heatWaveDays} days above 35°C. Safe for C3 cash season crops like Wheat, Mustard, Peas, Potato.`;
+      heatWarningA = `Thermal status safe: Low heat exposure (${heatWaveDays} days >35°C). Suitable for standard C3 season crops.`;
+      heatResilienceB = `Thermal baseline: High moisture retention capacity while operating well below critical thermal thresholds.`;
+      heatShieldC = `Soil health: High biological nitrogen fixation adds fertility while keeping ground covered.`;
+    }
+
     return {
       coordinates: { latitude: lat, longitude: lng },
       inputs: { crop, season, soil, irrigation },
@@ -484,6 +586,19 @@
         gwettop: parseFloat(gwettop.toFixed(2)),
         gwetroot: parseFloat(gwetroot.toFixed(2)),
         t2m_max: parseFloat(t2m_max.toFixed(1)),
+        t2m_min: liveNasa.t2m_min !== null ? parseFloat(liveNasa.t2m_min.toFixed(1)) : 22.4,
+        ts_earth_skin: liveNasa.ts_earth_skin !== null ? parseFloat(liveNasa.ts_earth_skin.toFixed(1)) : 44.8,
+        solar_radiation: liveNasa.solar_radiation !== null ? parseFloat(liveNasa.solar_radiation.toFixed(1)) : 19.8,
+        heat_indicators: {
+          peak_t2m_max: peakTemp,
+          heat_wave_days: heatWaveDays,
+          hot_soil_days: hotSoilDays,
+          growing_degree_days: gdd
+        },
+        heat_assessment: {
+          level: heatLevel,
+          decision_text: heatDecisionDescription
+        },
         precip: precip
       },
       strategies: {
@@ -494,6 +609,7 @@
           et_demand_mm: baselineEt,
           nitrogen_balance_kg_ha: baselineN,
           risk_score: parseFloat(baselineRisk.toFixed(2)),
+          heat_warning: heatWarningA,
           description: 'Continuous ' + crop + ' cycle under unmitigated hydrologic and nutrient stress.'
         },
         strategy_b: {
@@ -505,6 +621,7 @@
           gwettop_trigger: 0.40,
           gwettop_actual: parseFloat(gwettop.toFixed(2)),
           water_savings_percent: waterSavedPct,
+          heat_resilience: heatResilienceB,
           description: 'Rotates to ' + cf.c4 + ' with C4 photosynthesis when GWETTOP drops below 0.40.'
         },
         strategy_c: {
@@ -516,6 +633,7 @@
           ndvi_cover: parseFloat(ndviCoverVal),
           recommended_legume: 'Pigeonpea / Chickpea / Green Gram',
           urea_offset_percent: 42,
+          heat_shield: heatShieldC,
           description: 'Integrates biological nitrogen fixation (+40 to +80 kg N/ha) to restore degraded topsoil.'
         }
       }
@@ -547,6 +665,24 @@
           ? `Filtered out ${q.flagged_days} days containing NASA fill value (-999).`
           : 'Warning flag active: 100% valid daily readings without -999 fill values.';
       }
+    }
+
+    // Update Heat Sensors & Indicators
+    if (matrixT2mMin) matrixT2mMin.textContent = data.telemetry.t2m_min.toFixed(1) + ' °C';
+    if (matrixTs) matrixTs.textContent = data.telemetry.ts_earth_skin.toFixed(1) + ' °C';
+    if (matrixSolar) matrixSolar.textContent = data.telemetry.solar_radiation.toFixed(1) + ' MJ/m²';
+    if (matrixHeatWaveDays) matrixHeatWaveDays.textContent = data.telemetry.heat_indicators.heat_wave_days + ' Days';
+    if (matrixHotSoilDays) matrixHotSoilDays.textContent = data.telemetry.heat_indicators.hot_soil_days + ' Days';
+
+    // Update Strategy Heat Warning Banners (Section 5 Website Output)
+    if (heatTextA && data.strategies.strategy_a.heat_warning) {
+      heatTextA.textContent = data.strategies.strategy_a.heat_warning;
+    }
+    if (heatTextB && data.strategies.strategy_b.heat_resilience) {
+      heatTextB.textContent = data.strategies.strategy_b.heat_resilience;
+    }
+    if (heatTextC && data.strategies.strategy_c.heat_shield) {
+      heatTextC.textContent = data.strategies.strategy_c.heat_shield;
     }
 
     // Update Strategy A

@@ -347,6 +347,11 @@
             <p class="card-description">Continuous single-crop cycle maintained under current management practices without rotational breaks or moisture hedging.</p>
 
             <!-- Feature / Parameter Checklist -->
+            <!-- Heat Stress Impact Banner (Strategy A: Baseline Monocrop) -->
+            <div class="strategy-heat-banner" id="heat-banner-a" style="margin-bottom: 1rem; padding: 0.6rem 0.85rem; border-radius: var(--radius-md); background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); font-size: 0.8rem; color: var(--danger);">
+              <strong>Heat Warning:</strong> <span id="heat-text-a">High risk of flower drop and excessive irrigation demand under thermal stress.</span>
+            </div>
+
             <ul class="card-checklist">
               <li class="checklist-item">
                 <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -415,6 +420,11 @@
             <h3 class="card-title">Strategy B: Drought-Resilient Rotation</h3>
             <p class="card-description">Strategic shift to high water-use efficiency crops triggered when NASA satellite surface wetness indicates soil moisture deficits.</p>
 
+            <!-- Heat Stress Impact Banner (Strategy B: Why it wins in High Heat) -->
+            <div class="strategy-heat-banner" id="heat-banner-b" style="margin-bottom: 1rem; padding: 0.6rem 0.85rem; border-radius: var(--radius-md); background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.25); font-size: 0.8rem; color: #06b6d4;">
+              <strong>Thermal Resilience:</strong> <span id="heat-text-b">Why it wins in High Heat: C4 anatomy partially closes leaf pores during peak midday heat to resist dehydration.</span>
+            </div>
+
             <ul class="card-checklist">
               <li class="checklist-item">
                 <svg class="checklist-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -480,6 +490,11 @@
 
             <h3 class="card-title">Strategy C: Legume Intercrop</h3>
             <p class="card-description">Integration of pulse legumes to biologically fix atmospheric nitrogen, build soil organic carbon, and prevent bare ground erosion.</p>
+
+            <!-- Heat Stress Impact Banner (Strategy C: Dense Canopy Shade) -->
+            <div class="strategy-heat-banner" id="heat-banner-c" style="margin-bottom: 1rem; padding: 0.6rem 0.85rem; border-radius: var(--radius-md); background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); font-size: 0.8rem; color: #10b981;">
+              <strong>Soil Shield:</strong> <span id="heat-text-c">Why it helps: Dense leafy canopy lowers soil surface temperature TS and protects root-zone soil wetness GWETROOT.</span>
+            </div>
 
             <ul class="card-checklist">
               <li class="checklist-item">
@@ -554,7 +569,7 @@
           <div class="telemetry-tile">
             <span class="telemetry-param-name">NASA POWER T2M_MAX</span>
             <div class="telemetry-value" id="matrix-t2m-max">34.2 °C</div>
-            <p class="telemetry-desc">Daily Maximum 2-meter Air Temperature. Flags crop heat stress events.</p>
+            <p class="telemetry-desc">Daily Maximum 2-meter Air Temperature. Spots spikes above 35°C.</p>
           </div>
 
           <!-- Sensor 4: Precipitation -->
@@ -576,6 +591,48 @@
             <span class="telemetry-param-name">Quality: Fill Value -999</span>
             <div class="telemetry-value" id="matrix-data-quality">90 / 90 Days</div>
             <p class="telemetry-desc" id="matrix-quality-desc">Warning flag active: automatically filters out any fill value of -999.</p>
+          </div>
+
+          <!-- Sensor 7: T2M_MIN (Night Recovery) -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">NASA POWER T2M_MIN</span>
+            <div class="telemetry-value" id="matrix-t2m-min">22.4 °C</div>
+            <p class="telemetry-desc">Daily Minimum Night Temperature. Shows if nights stay above 25°C (no crop recovery).</p>
+          </div>
+
+          <!-- Sensor 8: TS (Earth Skin Temperature) -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">NASA POWER TS</span>
+            <div class="telemetry-value" id="matrix-ts">44.8 °C</div>
+            <p class="telemetry-desc">Earth Skin Surface Temperature. Shows how hot soil surface truly gets.</p>
+          </div>
+
+          <!-- Sensor 9: Solar Radiation Flux -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">ALLSKY_SFC_SW_DWN</span>
+            <div class="telemetry-value" id="matrix-solar">19.8 MJ/m²</div>
+            <p class="telemetry-desc">Solar Radiation Intensity at earth surface. High flux accelerates transpiration.</p>
+          </div>
+
+          <!-- Sensor 10: ECOSTRESS LST & Evapotranspiration -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">ECOSTRESS (ISS)</span>
+            <div class="telemetry-value" id="matrix-ecostress">High-Detail</div>
+            <p class="telemetry-desc">Field-scale LST hotspots &amp; Evapotranspiration plant sweating / stomatal shutdown.</p>
+          </div>
+
+          <!-- Sensor 11: Heat Indicator: Days > 35°C -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">Heat Days (>35°C)</span>
+            <div class="telemetry-value" id="matrix-heat-wave-days">22 Days</div>
+            <p class="telemetry-desc">Cumulative days T2M_MAX &gt; 35°C in last 90 days. Key thermal threshold.</p>
+          </div>
+
+          <!-- Sensor 12: Heat Indicator: Soil Heat Days (>40°C) -->
+          <div class="telemetry-tile">
+            <span class="telemetry-param-name">Soil Heat Days (>40°C)</span>
+            <div class="telemetry-value" id="matrix-hot-soil-days">14 Days</div>
+            <p class="telemetry-desc">Cumulative days Earth Skin TS &gt; 40°C. Bakes topsoil &amp; halts beneficial microbes.</p>
           </div>
         </div>
       </div>
